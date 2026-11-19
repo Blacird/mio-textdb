@@ -181,9 +181,7 @@ button.act{
 <section id="list"></section>
 
 <footer>
-  <span>数据源：游戏本地化表 spoken / non_spoken / other</span>
-  <span style="opacity:.65">内容版权归 Douze Dixièmes / Focus Entertainment 所有 · 仅供个人研究，禁止商用</span>
-  <button class="act" id="exp">导出当前结果 CSV</button>
+  <span style="opacity:.6">内容版权归 Douze Dixièmes / Focus Entertainment 所有 · 仅供个人研究，禁止商用</span>
 </footer>
 
 
@@ -587,18 +585,6 @@ $("#list").addEventListener("scroll", e=>{
   }
 });
 
-$("#exp").onclick = ()=>{
-  const head = ["key_id","category","speaker_key","speaker_zh","area_code","area_zh","area_en","en","fr","zh_s","zh_t"];
-  const csv = [head.join(",")].concat(FILTERED.map(d=>head.map(h=>{
-    const v = (d[h]??"").toString().replace(/"/g,'""');
-    return /[",\n]/.test(v) ? `"${v}"` : v;
-  }).join(","))).join("\n");
-  const blob = new Blob(["\ufeff"+csv], {type:"text/csv;charset=utf-8"});
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = `mio_text_${FILTERED.length}.csv`;
-  a.click();
-};
 
 
 function langBlock(lb, key, txt, cls){
