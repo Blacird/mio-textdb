@@ -222,20 +222,20 @@ DATA.forEach((d, i) => { d._i = i; });
 })();
 const CAT_ZH = {
   dialogue:"对话", voiceover:"语音演出", mumble:"循环嘟囔", text:"系统文本",
-  term:"术语", item:"物品", trinket:"饰品", curio:"收藏品", memory:"记忆", letter:"信件",
-  pearl:"珍珠", keepsake:"纪念物", credit:"制作名单"
+  term:"术语", item:"物品", trinket:"调整元件", curio:"古董", memory:"记忆", letter:"信件",
+  pearl:"「珠」", keepsake:"纪念品", credit:"制作名单"
 };
 const CAT_DIM = {
   voiceover:"说话人", mumble:"说话人", dialogue:"说话人 / 区域", text:"区域",
-  item:"物品分类", trinket:"饰品列表", curio:"物品分类", keepsake:"物品分类", pearl:"物品分类",
+  item:"物品分类", trinket:"调整元件", curio:"古董", keepsake:"物品分类", pearl:"物品分类",
   memory:"区域", letter:"作者", term:"条目类型"
 };
 const SUB_ZH = {
   ITEM:"物品", UI:"界面", OVERLAY:"覆盖层", FLOOR:"楼层", CHECKPOINT:"存档点",
   HOVERTEXT:"悬停提示", ACTION:"动作", DATAPAD:"数据板", TXT:"对话文本",
-  VO:"语音台词", NPC:"NPC", SHII:"希伊", CURIO:"收藏品", MEM:"记忆",
-  LETTER:"信件", PEARL:"珍珠", KEEPSAKE:"纪念物", GUIDE:"图鉴", MIO:"MIO",
-  VOICE:"声音卡", GABOU:"安港", LQCITY:"都会", HUB:"枢纽", GW:"林荫道",
+  VO:"语音台词", NPC:"NPC", SHII:"希伊", CURIO:"古董", MEM:"记忆",
+  LETTER:"信件", PEARL:"「珠」", KEEPSAKE:"纪念品", GUIDE:"图鉴", MIO:"MIO",
+  VOICE:"「声」", GABOU:"安港", LQCITY:"都会", HUB:"枢纽", GW:"林荫道",
   RAD:"辐射区", ST:"站点", TW:"眸", SECURITY:"安保区", AMYTIS:"息", HALYN:"手"
 };
 const TAG_ZH = {sustain:"延长", redacted:"数据删除", "expurgé":"数据删除", icon:"图标"};
@@ -274,14 +274,14 @@ const SUB_KEYS = new Set(["UI","NPC","OVERLAY","HOVERTEXT","FLOOR","CHECKPOINT",
 // 值得细分的四大类：按二级前缀拆子类
 const SUB2 = {
   ITEM: {
-    TRINKET:"饰品", KEY:"钥匙", CHEST_KEY:"宝箱钥匙", UNLOCK:"解锁模块",
+    TRINKET:"调整元件", KEY:"钥匙", CHEST_KEY:"宝箱钥匙", UNLOCK:"解锁模块",
     VOICE:"「声」", SHOP_UPGRADE:"商店升级", RESOURCE:"资源",
     SHIELD_FRAGMENT:"护盾碎片", ATTACK_POWER:"攻击强化", TERMINAL:"终端机",
-    TRINKET_SLOT_UPGRADE:"饰品槽升级", EMBLEM:"徽章", CANDLE:"蜡烛"
+    TRINKET_SLOT_UPGRADE:"栏位升级", EMBLEM:"徽章", CANDLE:"蜡烛"
   },
   UI: {
     MENU:"菜单", MAP:"地图", SAVE:"存档", SETTINGS:"设置", EULA:"终端用户许可协议",
-    TRINKETS:"饰品页", TRINKET:"饰品页", DEMO:"试玩", TELEMETRY:"隐私声明",
+    TRINKETS:"调整元件页", TRINKET:"调整元件页", DEMO:"试玩", TELEMETRY:"隐私声明",
     SHOP:"商店", MAIN:"主界面", LOOT:"拾取", TIME:"时间", SYS:"系统"
   },
   HOVERTEXT: {
