@@ -158,6 +158,37 @@ footer{
 .mln p{margin:0; font-size:15px; line-height:1.85; color:#e9f4f7; white-space:pre-wrap; word-break:break-word}
 .mln.zh p{color:#fff}
 .mempty{color:#8cafc3; font-size:13px; padding:10px 0}
+.setwrap{position:relative}
+.setbtn{
+  min-width:34px; padding:4px 9px; border:1px solid var(--line); background:transparent;
+  color:var(--accent); border-radius:5px; cursor:pointer; font-size:12px; font-family:inherit;
+}
+.setbtn:hover{background:#173f63}
+.setpanel{
+  position:absolute; top:calc(100% + 8px); left:0; width:252px; z-index:300;
+  background:#0f2b46; border:1px solid #2b5b85; border-radius:10px;
+  padding:14px 16px 16px; box-shadow:0 18px 50px rgba(0,0,0,.55);
+}
+.ssec{font-size:10.5px; color:#5cd9c8; letter-spacing:.08em; margin:15px 0 7px}
+.ssec:first-child{margin-top:0}
+.sseg{display:flex; flex-wrap:wrap; gap:5px}
+.sseg button{
+  padding:3px 9px; border:1px solid #2b5b85; background:transparent; color:#8cafc3;
+  border-radius:4px; cursor:pointer; font-size:11px; font-family:inherit;
+}
+.sseg button.on{background:#1c4e7a; border-color:#f0c674; color:#f0c674}
+.sgrp{display:flex; flex-direction:column; gap:6px; font-size:12px; color:#cfe0ea}
+.sgrp label{display:flex; align-items:center; gap:7px; cursor:pointer}
+.sord{display:flex; flex-direction:column; gap:4px}
+.srow{display:flex; align-items:center; gap:7px; font-size:12px; color:#cfe0ea}
+.srow b{width:13px; color:#5f7f96; font-weight:400}
+.srow span{flex:1}
+.srow button{
+  width:23px; height:20px; border:1px solid #2b5b85; background:transparent; color:#8cafc3;
+  border-radius:3px; cursor:pointer; font-size:11px; line-height:1; font-family:inherit;
+}
+.srow button:disabled{opacity:.28; cursor:default}
+.srow button:hover:not(:disabled){border-color:#f0c674; color:#f0c674}
 button.act{
   margin-left:auto; padding:4px 12px; border-radius:5px; cursor:pointer;
   background:var(--accent); color:#0d1f33; border:0; font-weight:600; font-size:11.5px;
@@ -167,29 +198,27 @@ button.act{
 <body>
 <header>
   <div class="brand">MIO 文本库<small>简体 · English · 繁體 · Français</small></div>
-  <input id="q" placeholder="搜索任意语言：Halyn / 安港 / Haven / Sanctuaire" autocomplete="off">
-  <div class="stat">匹配 <b id="n">0</b> / <span id="total">0</span></div>
+  <div class="setwrap">
+    <button id="setbtn" class="setbtn" title="Language">中</button>
+    <div id="setpanel" class="setpanel" hidden></div>
+  </div>
+  <input id="q" placeholder="" autocomplete="off">
+  <div class="stat"><span id="mtxt"></span> <b id="n">0</b> / <span id="total">0</span></div>
 </header>
 
 <div class="filters">
   <div class="cats" id="cats"></div>
   <div class="row2">
     <span class="dim" id="dim"></span>
-    <select id="spk"><option value="">全部角色</option></select>
-    <select id="area"><option value="">全部区域</option></select>
-    <select id="sub"><option value="">全部子类</option></select>
+    <select id="spk"></select>
+    <select id="area"></select>
+    <select id="sub"></select>
     <div class="cols">
-      <span>分栏</span>
-      <button data-c="auto" class="on">自动</button>
+      <span id="coltxt"></span>
+      <button data-c="auto" class="on" id="colauto"></button>
       <button data-c="1">1</button>
       <button data-c="2">2</button>
       <button data-c="3">3</button>
-    </div>
-    <div class="langs">
-      <label class="fixed"><input type="checkbox" checked disabled> 简中</label>
-      <label><input type="checkbox" id="len" checked> 英文</label>
-      <label><input type="checkbox" id="lzt" checked> 繁中</label>
-      <label><input type="checkbox" id="lfr" checked> 法文</label>
     </div>
   </div>
 </div>
@@ -197,7 +226,7 @@ button.act{
 <section id="list"></section>
 
 <footer>
-  <span style="opacity:.6">内容版权归 Douze Dixièmes / Focus Entertainment 所有 · 仅供个人研究，禁止商用</span>
+  <span id="copy" style="opacity:.6"></span>
 </footer>
 
 
@@ -335,7 +364,64 @@ function poolOf(){
   return DATA.filter(d => !d.merged);
 }
 
-const state = {q:"", cat:"", spk:"", area:"", subcat:"", cols:"auto", showEn:true, showZhT:true, showFr:true, shown:200};
+const LNAME = {
+  zh_s:{zh_s:"简中", zh_t:"簡中", en:"简体中文", fr:"Chinois simp."},
+  zh_t:{zh_s:"繁中", zh_t:"繁中", en:"繁體中文", fr:"Chinois trad."},
+  en:{zh_s:"英文", zh_t:"英文", en:"English", fr:"Anglais"},
+  fr:{zh_s:"法文", zh_t:"法文", en:"French", fr:"Français"}
+};
+
+const CAT_I18N = {
+  dialogue:{zh_s:"对话", zh_t:"對話", en:"Dialogue", fr:"Dialogue"},
+  term:{zh_s:"术语", zh_t:"術語", en:"Term", fr:"Terme"},
+  text:{zh_s:"系统文本", zh_t:"系統文字", en:"System text", fr:"Texte système"},
+  voiceover:{zh_s:"语音演出", zh_t:"語音演出", en:"Voiceover", fr:"Voix"},
+  mumble:{zh_s:"循环嘟囔", zh_t:"循環呢喃", en:"Mumble", fr:"Murmure"},
+  item:{zh_s:"物品", zh_t:"物品", en:"Item", fr:"Objet"},
+  trinket:{zh_s:"调整元件", zh_t:"調整裝置", en:"Modifier", fr:"Modificateur"},
+  curio:{zh_s:"古董", zh_t:"珍品", en:"Curio", fr:"Curiosité"},
+  keepsake:{zh_s:"纪念品", zh_t:"紀念品", en:"Keepsake", fr:"Souvenir"},
+  memory:{zh_s:"记忆", zh_t:"記憶", en:"Memory", fr:"Mémoire"},
+  letter:{zh_s:"信件", zh_t:"信件", en:"Letter", fr:"Lettre"},
+  pearl:{zh_s:"「珠」", zh_t:"「珍珠」", en:"Pearl", fr:"Perle"}
+};
+
+const T = {
+  zh_s:{all:"全部", nozh:"无中文", allspk:"全部角色", allarea:"全部区域", allsub:"全部子类",
+    alllang:"全部子类", dim:"主维度", cols:"分栏", auto:"自动", match:"匹配",
+    shown:"已显示全部", empty:"没有匹配的文本", search:"搜索任意语言…",
+    desc:"说明", flav:"风味文本", analysed:"金莲花的解析", none:"（无文本内容）",
+    uiLang:"界面语言", contentLang:"内容语言", order:"显示顺序", sets:"显示设置", hide:"隐藏",
+    copy:"内容版权归 Douze Dixièmes / Focus Entertainment 所有 · 仅供个人研究，禁止商用"},
+  zh_t:{all:"全部", nozh:"無中文", allspk:"全部角色", allarea:"全部區域", allsub:"全部子類",
+    alllang:"全部子類", dim:"主維度", cols:"分欄", auto:"自動", match:"匹配",
+    shown:"已顯示全部", empty:"沒有符合的文本", search:"搜尋任何語言…",
+    desc:"說明", flav:"風味文本", analysed:"Capucine 的說明", none:"（無文本內容）",
+    uiLang:"介面語言", contentLang:"內容語言", order:"顯示順序", sets:"顯示設定", hide:"隱藏",
+    copy:"內容版權歸 Douze Dixièmes / Focus Entertainment 所有 · 僅供個人研究，禁止商用"},
+  en:{all:"All", nozh:"No Chinese", allspk:"All speakers", allarea:"All areas", allsub:"All subtypes",
+    alllang:"All subtypes", dim:"Main dimension", cols:"Columns", auto:"Auto", match:"matches",
+    shown:"All entries shown", empty:"No matching text", search:"Search any language…",
+    desc:"Description", flav:"Flavour text", analysed:"Capucine's interpretation", none:"(no text)",
+    uiLang:"Interface language", contentLang:"Content languages", order:"Display order", sets:"Display settings", hide:"Close",
+    copy:"© Douze Dixièmes / Focus Entertainment · For personal research only, no commercial use"},
+  fr:{all:"Tout", nozh:"Sans chinois", allspk:"Tous les personnages", allarea:"Toutes les zones", allsub:"Tous les sous-types",
+    alllang:"Tous les sous-types", dim:"Dimension principale", cols:"Colonnes", auto:"Auto", match:"résultats",
+    shown:"Toutes les entrées affichées", empty:"Aucun texte correspondant", search:"Rechercher dans toutes les langues…",
+    desc:"Description", flav:"Texte d'ambiance", analysed:"Interprétation de Capucine", none:"(aucun texte)",
+    uiLang:"Langue de l'interface", contentLang:"Langues du contenu", order:"Ordre d'affichage", sets:"Affichage", hide:"Fermer",
+    copy:"© Douze Dixièmes / Focus Entertainment · Usage personnel uniquement, usage commercial interdit"}
+};
+
+const state = {
+  q:"", cat:"", spk:"", area:"", subcat:"", cols:"auto", shown:200,
+  uiLang:"zh_s",
+  langOrder:["zh_s","en","zh_t","fr"],
+  show:{zh_s:true, en:true, zh_t:true, fr:true}
+};
+
+function tr(k){ return (T[state.uiLang] || T.zh_s)[k] || T.zh_s[k] || k; }
+function catName(c){ return (CAT_I18N[c] && CAT_I18N[c][state.uiLang]) || CAT_ZH[c] || c; }
 let FILTERED = [];
 
 function fmtText(s, q){
@@ -389,10 +475,10 @@ function buildCats(){
   const counts = {};
   DATA.forEach(d => counts[d.category] = (counts[d.category]||0)+1);
   const noZh = DATA.filter(d => !d.merged && !hasChinese(d)).length;
-  let html = `<button class="cat${state.cat?"":" on"}" data-k="">全部<i>${DATA.length}</i></button>`;
-  html += `<button class="cat${state.cat==="__nozh__"?" on":""}" data-k="__nozh__" title="完全没有中文译文的条目">无中文<i>${noZh}</i></button>`;
+  let html = `<button class="cat${state.cat?"":" on"}" data-k="">${tr("all")}<i>${DATA.length}</i></button>`;
+  html += `<button class="cat${state.cat==="__nozh__"?" on":""}" data-k="__nozh__">${tr("nozh")}<i>${noZh}</i></button>`;
   Object.entries(counts).sort((a,b)=>b[1]-a[1]).forEach(([k,v])=>{
-    html += `<button class="cat${state.cat===k?" on":""}" data-k="${k}" title="${k}">${CAT_ZH[k]||k}<i>${v}</i></button>`;
+    html += `<button class="cat${state.cat===k?" on":""}" data-k="${k}" title="${k}">${catName(k)}<i>${v}</i></button>`;
   });
   box.innerHTML = html;
   box.querySelectorAll(".cat").forEach(b=>{
@@ -441,14 +527,14 @@ function buildSelects(){
     subs[s] = (subs[s] || 0) + 1;
   });
 
-  let html = `<option value="">全部角色</option>`;
+  let html = `<option value="">${tr("allspk")}</option>`;
   Object.entries(spk).sort((a,b)=>b[1].n-a[1].n).forEach(([k,v])=>{
     const nm = nameOf({speaker_key:k, speaker_zh:v.zh, speaker_en:v.en}, "spk") || k;
     html += `<option value="${esc(k)}">${esc(nm)} · ${v.n}</option>`;
   });
   $("#spk").innerHTML = html;
 
-  html = `<option value="">全部区域</option>`;
+  html = `<option value="">${tr("allarea")}</option>`;
   Object.entries(AREA_GROUPS).sort((a,b)=>b[1].n-a[1].n).forEach(([k,v])=>{
     const nm = v.zh ? (v.en ? `${v.zh}（${v.en}）` : v.zh) : k;
     html += `<option value="${esc(k)}">${esc(nm)} · ${v.n}</option>`;
@@ -461,7 +547,7 @@ function buildSelects(){
     const p = k.includes(":") ? k.slice(0, k.indexOf(":")) : k;
     (gmap[p] = gmap[p] || []).push([k, v]);
   });
-  html = `<option value="">全部子类</option>`;
+  html = `<option value="">${tr("allsub")}</option>`;
   Object.entries(gmap)
     .sort((a,b)=> b[1].reduce((s,x)=>s+x[1],0) - a[1].reduce((s,x)=>s+x[1],0))
     .forEach(([p, items])=>{
@@ -478,7 +564,7 @@ function buildSelects(){
   $("#sub").disabled = Object.keys(subs).length <= 1;
 
   const dim = CAT_DIM[state.cat] || "";
-  $("#dim").textContent = dim ? `主维度：${dim}` : "";
+  $("#dim").textContent = dim ? tr("dim") + " · " + dim : "";
 }
 
 function filter(){
@@ -503,13 +589,19 @@ function filter(){
   });
 }
 
+const LLINE = {zh_s:["简","zh"], en:["EN","en"], zh_t:["繁","zhT"], fr:["FR","fr"]};
+
 function linesFor(o, q){
   const hasZh = !!(o.zh_s || o.zh_t);
   const out = [];
-  if(o.zh_s) out.push({lb:"简", cls:"zh", t:o.zh_s, o:0});
-  if(o.en && (state.showEn || !hasZh)) out.push({lb:"EN", cls:"en", t:o.en, o:1});
-  if(o.zh_t && state.showZhT) out.push({lb:"繁", cls:"zhT", t:o.zh_t, o:2});
-  if(o.fr && (state.showFr || !hasZh)) out.push({lb:"FR", cls:"fr", t:o.fr, o:3});
+  state.langOrder.forEach((k, idx)=>{
+    const v = o[k];
+    if(!v) return;
+    const forced = (k === "en" || k === "fr") && !hasZh;
+    if(!state.show[k] && !forced) return;
+    const [lb, cls] = LLINE[k];
+    out.push({lb, cls, t:v, o:idx});
+  });
   out.sort((a,b)=>a.o-b.o);
   return out.map(x=>`<div class="ln ${x.cls}"><b>${x.lb}</b><p>${fmtText(x.t,q)}</p></div>`).join("");
 }
@@ -521,9 +613,11 @@ function entryHTML(d, q, prev, next){
 
   const tMain = d.title_zh_s || d.title_zh_t || d.title_en || d.title_fr || "";
   const subs = [];
-  if(d.title_en && d.title_en !== tMain && state.showEn) subs.push(fmtText(d.title_en, q));
-  if(d.title_zh_t && d.title_zh_t !== tMain && state.showZhT) subs.push(fmtText(d.title_zh_t, q));
-  if(d.title_fr && d.title_fr !== tMain && state.showFr) subs.push(fmtText(d.title_fr, q));
+  const tmap = {zh_s:d.title_zh_s, en:d.title_en, zh_t:d.title_zh_t, fr:d.title_fr};
+  state.langOrder.forEach(k=>{
+    const v = tmap[k];
+    if(v && v !== tMain && state.show[k]) subs.push(fmtText(v, q));
+  });
   const titleHTML = tMain
     ? `<div class="ttl">${fmtText(tMain, q)}${subs.length ? `<span class="ttl2">${subs.join(" · ")}</span>` : ""}</div>`
     : "";
@@ -535,7 +629,7 @@ function entryHTML(d, q, prev, next){
     ? `<div class="txt flav">${linesFor({zh_s:d.flavour_zh_s, en:d.flavour_en, zh_t:d.flavour_zh_t, fr:d.flavour_fr}, q)}</div>`
     : "";
   const anHTML = (d.analysed_zh_s || d.analysed_en)
-    ? `<div class="txt analysed"><div class="asec">卡普辛分析</div>${linesFor({
+    ? `<div class="txt analysed"><div class="asec">${tr("analysed")}</div>${linesFor({
         zh_s: tailOf(d.analysed_zh_s, d.zh_s), en: tailOf(d.analysed_en, d.en),
         zh_t: tailOf(d.analysed_zh_t, d.zh_t), fr: tailOf(d.analysed_fr, d.fr)
       }, q)}</div>`
@@ -550,7 +644,7 @@ function entryHTML(d, q, prev, next){
 
   const flags = [];
   const subLabel = subcatLabel(subcatOf(d.key_id));
-  if(subLabel && subLabel !== "其他" && subLabel !== CAT_ZH[d.category])
+  if(subLabel && subLabel !== "其他" && subLabel !== catName(d.category))
     flags.push(`<span class="flag c">${esc(subLabel)}</span>`);
   if(by.length) flags.push(`<span class="flag c">${by.join(" · ")}</span>`);
   if(d.meta_of) flags.push(`<span class="flag c">${d.merge_type === "dup" ? "重复于" : "并入"} ${esc(d.meta_of)}</span>`);
@@ -569,7 +663,7 @@ function entryHTML(d, q, prev, next){
       ${samePrev
         ? `<span class="gseq">#${d.gseq}</span>`
         : `<span class="kid">${esc(d.key_id)}</span>${sameNext ? `<span class="gcount">${d.glen} 句连续</span>` : ""}`}
-      ${state.cat === d.category ? "" : `<span class="cattag" title="${esc(d.category)}">${CAT_ZH[d.category] || d.category}</span>`}
+      ${state.cat === d.category ? "" : `<span class="cattag" title="${esc(d.category)}">${catName(d.category)}</span>`}
       ${who}${area}${flags.join("")}
     </div>
     ${descHTML}${bodyHTML}${flavHTML}${anHTML}
@@ -580,7 +674,7 @@ function render(append){
   const list = $("#list");
   if(!append) list.innerHTML = "";
   else { const t = list.querySelector(".endtip"); if(t) t.remove(); }
-  if(!FILTERED.length){ list.innerHTML = '<div class="empty">没有匹配的文本</div>'; return; }
+  if(!FILTERED.length){ list.innerHTML = `<div class="empty">${tr("empty")}</div>`; return; }
   const q = state.q.trim();
   const from = append ? (list.dataset.shown|0) : 0;
   const slice = FILTERED.slice(from, state.shown);
@@ -612,7 +706,7 @@ function render(append){
   list.insertAdjacentHTML("beforeend", buf);
   list.dataset.shown = state.shown;
   if(state.shown >= FILTERED.length){
-    list.insertAdjacentHTML("beforeend", `<div class="endtip">已显示全部 ${FILTERED.length} 条</div>`);
+    list.insertAdjacentHTML("beforeend", `<div class="endtip">${tr("shown")} · ${FILTERED.length}</div>`);
   }
 }
 
@@ -650,11 +744,6 @@ $("#q").addEventListener("input", e=>{ state.q = e.target.value; apply(); });
 $("#spk").addEventListener("change", e=>{ state.spk = e.target.value; apply(); });
 $("#area").addEventListener("change", e=>{ state.area = e.target.value; apply(); });
 $("#sub").addEventListener("change", e=>{ state.subcat = e.target.value; apply(); });
-["len","lzt","lfr"].forEach((id,i)=>{
-  const key = ["showEn","showZhT","showFr"][i];
-  $("#"+id).addEventListener("change", e=>{ state[key] = e.target.checked; apply(); });
-});
-
 $("#list").addEventListener("scroll", e=>{
   const el = e.target;
   if(el.scrollTop + el.clientHeight > el.scrollHeight - 600 && state.shown < FILTERED.length){
@@ -676,10 +765,10 @@ function renderModalBody(d){
     + langBlock("FR", "fr", o.fr, "");
   let body = "";
   if(d.desc_zh_s || d.desc_en)
-    body += `<div class="msec">说明</div>` + block({zh_s:d.desc_zh_s, en:d.desc_en, zh_t:d.desc_zh_t, fr:d.desc_fr});
+    body += `<div class="msec">${tr("desc")}</div>` + block({zh_s:d.desc_zh_s, en:d.desc_en, zh_t:d.desc_zh_t, fr:d.desc_fr});
   body += block(d);
   if(d.flavour_zh_s || d.flavour_en)
-    body += `<div class="msec">风味文本</div>` + block({zh_s:d.flavour_zh_s, en:d.flavour_en, zh_t:d.flavour_zh_t, fr:d.flavour_fr});
+    body += `<div class="msec">${tr("flav")}</div>` + block({zh_s:d.flavour_zh_s, en:d.flavour_en, zh_t:d.flavour_zh_t, fr:d.flavour_fr});
   if(!body.trim()) body = `<div class="mempty">（当前没有可显示的语言内容）</div>`;
   return body;
 }
@@ -698,7 +787,7 @@ function openModal(i){
   if(tMain) h += `<h2 class="mtitle">${esc(tMain)}${tSubs.length ? `<small>${esc(tSubs.join(" · "))}</small>` : ""}</h2>`;
 
   const chips = [`<span class="mchip kid">${esc(d.key_id)}</span>`];
-  const catLb = CAT_ZH[d.category] || d.category;
+  const catLb = catName(d.category);
   chips.push(`<button class="mchip" data-jump="cat">${catLb}</button>`);
   const sc = subcatLabel(subcatOf(d.key_id));
   if(sc && sc !== "其他" && sc !== catLb) chips.push(`<button class="mchip" data-jump="sub">${esc(sc)}</button>`);
@@ -749,6 +838,70 @@ document.addEventListener("keydown", e=>{
   if(e.key === "Escape" && !$("#modal").hidden) closeModal();
 });
 
+
+const AUTONYM = {zh_s:"简体中文", zh_t:"繁體中文", en:"English", fr:"Français"};
+const L4 = ["zh_s","zh_t","en","fr"];
+
+function refreshSetPanel(){
+  const box = $("#setpanel");
+  if(!box) return;
+  let h = `<div class="ssec">${tr("uiLang")}</div><div class="sseg">`;
+  L4.forEach(k=>{
+    h += `<button data-u="${k}" class="${state.uiLang===k?"on":""}">${AUTONYM[k]}</button>`;
+  });
+  h += `</div><div class="ssec">${tr("contentLang")}</div><div class="sgrp">`;
+  state.langOrder.forEach(k=>{
+    h += `<label><input type="checkbox" data-l="${k}" ${state.show[k]?"checked":""}>${LNAME[k][state.uiLang]}</label>`;
+  });
+  h += `</div><div class="ssec">${tr("order")}</div><div class="sord">`;
+  state.langOrder.forEach((k,i)=>{
+    h += `<div class="srow"><b>${i+1}</b><span>${LNAME[k][state.uiLang]}</span>`
+      + `<button data-mv="up" data-k="${k}" ${i===0?"disabled":""}>&#9650;</button>`
+      + `<button data-mv="dn" data-k="${k}" ${i===L4.length-1?"disabled":""}>&#9660;</button></div>`;
+  });
+  h += `</div>`;
+  box.innerHTML = h;
+}
+
+function refreshAll(){
+  $("#setbtn").textContent = {zh_s:"中", zh_t:"繁", en:"EN", fr:"FR"}[state.uiLang];
+  $("#q").placeholder = tr("search");
+  $("#mtxt").textContent = tr("match");
+  $("#coltxt").textContent = tr("cols");
+  $("#colauto").textContent = tr("auto");
+  $("#copy").textContent = tr("copy");
+  document.documentElement.lang = state.uiLang === "zh_s" ? "zh-CN" : state.uiLang === "zh_t" ? "zh-TW" : state.uiLang;
+  refreshSetPanel();
+  buildCats(); buildSelects(); apply();
+}
+
+$("#setbtn").addEventListener("click", e=>{
+  e.stopPropagation();
+  const b = $("#setpanel");
+  b.hidden = !b.hidden;
+});
+document.addEventListener("click", e=>{
+  if(!e.target.closest(".setwrap")) $("#setpanel").hidden = true;
+});
+$("#setpanel").addEventListener("click", e=>{
+  const u = e.target.closest("[data-u]");
+  if(u){ state.uiLang = u.dataset.u; refreshAll(); return; }
+  const mv = e.target.closest("[data-mv]");
+  if(mv){
+    const k = mv.dataset.k, i = state.langOrder.indexOf(k);
+    const j = mv.dataset.mv === "up" ? i - 1 : i + 1;
+    if(j >= 0 && j < state.langOrder.length){
+      state.langOrder[i] = state.langOrder[j];
+      state.langOrder[j] = k;
+      refreshAll();
+    }
+  }
+});
+$("#setpanel").addEventListener("change", e=>{
+  const l = e.target.closest("[data-l]");
+  if(l){ state.show[l.dataset.l] = l.checked; apply(); }
+});
+
 document.querySelectorAll(".cols button").forEach(b=>{
   b.onclick = ()=>{
     state.cols = b.dataset.c;
@@ -758,7 +911,7 @@ document.querySelectorAll(".cols button").forEach(b=>{
 });
 
 $("#total").textContent = DATA.length;
-buildCats();
+refreshAll();
 buildSelects();
 apply();
 </script>

@@ -90,6 +90,7 @@ SELECT key_id, zh_s FROM text_fts WHERE text_fts MATCH '安港';
 | `_DESC` | 说明 | 11 |
 | `ITEM_NAME_*` / `ITEM_DESCRIPTION_*` / `ITEM_FLAVOUR_*` | 同一物品的名称 / 说明 / 风味 | 176 |
 | `X_TITLE` + `X_DESCRIPTION` | 弹窗标题 + 说明 | 4 |
+| `CURIO_X_CAPUCINED` | 金莲花解析后的描述，存入 `analysed_*` 字段 | 9 |
 
 例：一封完整的信由四条记录组成，合并后为
 
@@ -99,7 +100,7 @@ LETTER_SPREAD · letter · 智 · 995 年
 简中 萨姆斯克，有好消息！…
 ```
 
-> **未合并**：`_CAPUCINED`（卡普辛装饰版）、`_Y`/`_N`（问答分支）、`_XBOX`/`_PS`（平台变体）——判定为独立内容。
+> **未合并**：`_Y`/`_N`（问答分支）、`_XBOX`/`_PS`（平台变体）——判定为独立内容。
 
 ### 二、术语去重（64 条）
 
