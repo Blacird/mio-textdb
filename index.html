@@ -779,6 +779,10 @@ function renderModalBody(d){
   body += block(d);
   if(d.flavour_zh_s || d.flavour_en)
     body += `<div class="msec">${tr("flav")}</div>` + block({zh_s:d.flavour_zh_s, en:d.flavour_en, zh_t:d.flavour_zh_t, fr:d.flavour_fr});
+  if(d.analysed_zh_s || d.analysed_en)
+    body += `<div class="msec">${tr("analysed")}</div>` + block({
+      zh_s: tailOf(d.analysed_zh_s, d.zh_s), en: tailOf(d.analysed_en, d.en),
+      zh_t: tailOf(d.analysed_zh_t, d.zh_t), fr: tailOf(d.analysed_fr, d.fr)});
   if(!body.trim()) body = `<div class="mempty">（当前没有可显示的语言内容）</div>`;
   return body;
 }
