@@ -466,14 +466,14 @@ function nameOf(d, kind){
   const latin = (L === "en" || L === "fr");
   if(kind === "spk"){
     if(latin) return d.speaker_en || d.speaker_zh || d.speaker_key || "";
-    const zh = L === "zh_t" ? (d.speaker_zh_t || d.speaker_zh) : d.speaker_zh;
-    if(!zh) return d.speaker_en || d.speaker_key || "";
-    return (d.speaker_en && d.speaker_en !== zh) ? `${zh}（${d.speaker_en}）` : zh;
+    if(!d.speaker_zh) return d.speaker_en || d.speaker_key || "";
+    return (d.speaker_en && d.speaker_en !== d.speaker_zh)
+      ? `${d.speaker_zh}（${d.speaker_en}）` : d.speaker_zh;
   }
   if(latin) return d.area_en || d.area_zh || d.area_code || "";
-  const zh = L === "zh_t" ? (d.area_zh_t || d.area_zh) : d.area_zh;
-  if(!zh) return d.area_en || d.area_code || "";
-  return (d.area_en && d.area_en !== zh) ? `${zh}（${d.area_en}）` : zh;
+  if(!d.area_zh) return d.area_en || d.area_code || "";
+  return (d.area_en && d.area_en !== d.area_zh)
+    ? `${d.area_zh}（${d.area_en}）` : d.area_zh;
 }
 
 function buildCats(){
