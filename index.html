@@ -883,7 +883,9 @@ $("#setbtn").addEventListener("click", e=>{
 document.addEventListener("click", e=>{
   if(!e.target.closest(".setwrap")) $("#setpanel").hidden = true;
 });
+$("#setpanel").addEventListener("mousedown", e=>e.stopPropagation());
 $("#setpanel").addEventListener("click", e=>{
+  e.stopPropagation();
   const u = e.target.closest("[data-u]");
   if(u){ state.uiLang = u.dataset.u; refreshAll(); return; }
   const mv = e.target.closest("[data-mv]");
