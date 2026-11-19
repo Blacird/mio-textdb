@@ -684,7 +684,7 @@ function entryHTML(d, q, prev, next){
 
 function render(append){
   const list = $("#list");
-  if(!append) list.innerHTML = "";
+  if(!append){ list.innerHTML = ""; list.scrollTop = 0; }
   else { const t = list.querySelector(".endtip"); if(t) t.remove(); }
   if(!FILTERED.length){ list.innerHTML = `<div class="empty">${tr("empty")}</div>`; return; }
   const q = state.q.trim();
