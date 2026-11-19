@@ -70,10 +70,17 @@ select{
 @media (max-width: 780px){ #list.c2, #list.c3{grid-template-columns:1fr} }
 .entry{border-bottom:1px solid var(--line); padding:7px 4px 8px; cursor:pointer; break-inside:avoid; -webkit-column-break-inside:avoid; min-width:0}
 .entry:hover{background:#12314e}
-.grpwrap{grid-column:1 / -1; border-left:2px solid #2a5578; padding-left:11px}
+.grpwrap{
+  grid-column:1 / -1; position:relative; padding-left:14px;
+  margin:8px 0 12px;
+}
+.grpwrap::before{
+  content:""; position:absolute; left:0; top:6px; bottom:6px;
+  width:2px; background:#2a5578; border-radius:1px;
+}
 .grpwrap .entry{padding-left:2px}
 .entry.gnext{border-bottom-color:#16334f}
-.grpwrap .entry:last-child{border-bottom:1px solid var(--line)}
+.grpwrap .entry:last-child{border-bottom:0}
 .gseq{font-family:ui-monospace,Consolas,monospace; font-size:10.5px; color:#5cd9c8; margin-right:5px}
 .gcount{font-size:10px; color:#5f7f96; margin-left:6px}
 .ttl{font-size:15px; font-weight:600; color:#fff; margin:1px 0 2px; line-height:1.35}
