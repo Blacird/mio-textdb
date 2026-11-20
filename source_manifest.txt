@@ -1,0 +1,50 @@
+MIO 文本库 · 数据来源清单
+================================================================
+
+一、原始数据（只读证据，未作任何修改）
+
+来源容器 : flamby/misc_files.gin  （19,084,188 字节，GIN v2）
+解包位置 : D:\Steam\steamapps\common\MIO\_textdb\out\misc_files\
+解包工具 : mio_decomp 0.3.2（直接调用 Rust 扩展 _mio_decomp.pyd）
+
+文件                                    字节数      SHA-256（前 32 位）
+--------------------------------------------------------------------
+0000_assetslocalockit_other.csv          749,626    28811a48d21985b99a020634d4fc838b
+0001_assetslocalockit_non_spoken.csv   2,226,642    c80cc364aaf4af47b96f6768221327c0
+0002_assetslocalockit_spoken.csv         104,523    c95dca719777b89a5f19355e23ad37db
+0003_assetslocacredits_EXPORT.csv         15,992    3f1f1fb57e842d41ac067e2b4ef9bee3
+
+上述四个文件即游戏内 assets/loc/ 下的本地化表（15 语种），
+本库仅从中取 简中 / 繁中 / 英语 / 法语 四列，其余语种仍完整保留在原文件中。
+
+如需证明数据未被篡改，可对原文件重新计算 SHA-256 与本清单比对。
+
+二、加工链路
+
+  原始 CSV 归一化                                       2,538 条
+    → 合并被拆散的元数据（标题/作者/日期/物品三段/弹窗说明）  − 312
+    → 术语同词去重（按简中+英文签名）                      − 64
+    → 移除完全无任何语言内容的空条目                        − 7
+  ───────────────────────────────────────────────────────────
+  最终统计集（进入数据库 / CSV / 检索工具）              2,155 条
+
+三、排除记录（保留以便追溯，不进入统计与检索）
+
+excluded_merged.txt   376 条：被合并或去重的原始条目，
+                              每条记录 key_id / 类型（merge|dup）/ 并入的对象
+excluded_empty.txt      7 条：四语全空、无任何内容的条目
+
+四、最终分类分布（2,155 条）
+
+dialogue    NPC 对话      941
+term        术语          655
+text        系统文本      172
+voiceover   语音演出      165
+mumble      循环嘟囔       82
+item        物品           49
+trinket     调整元件       45
+curio       古董            9
+keepsake    纪念品          8
+memory      记忆            7
+letter      信件            7
+pearl       「珠」           6
